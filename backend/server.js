@@ -1,24 +1,19 @@
-// backend/server.js
+// backend/server.js (UPDATED)
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes'); // Import routes
 
-// 1. Load environment variables
 dotenv.config();
-
-// 2. Connect to the database
 connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON bodies (needed for POST requests)
-app.use(express.json());
+// Middleware to parse JSON bodies (REQUIRED for POST requests)
+app.use(express.json()); 
 
-// Basic Test Route (Sanity Check)
-app.get('/', (req, res) => {
-  res.send('Expense Tracker API is running...');
-});
+// API Routes
+app.use('/api/auth', authRoutes); // Use the auth routes
 
-// 3. Start the server
-app.listen(PORT, console.log(`Server started on port ${PORT}`));
+app.listen(PORT, console.log(`Server running on port ${PORT}`));

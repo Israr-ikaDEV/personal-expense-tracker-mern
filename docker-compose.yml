@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # 1. NODE.JS API SERVICE (Reads its configuration from backend/Dockerfile)
+  api:
+    build: ./backend 
+    container_name: expense_api
+    restart: always
+    ports:
+      - "5000:5000"
+    # CRUCIAL FIX 1: Explicitly load the .env file from the project root
+    env_file:
+      - ./.env 
+    environment:
+      # Crucial fix 2: Use the MongoDB service name ('mongo') as the hostname
+      MONGO_URI: mongodb://mongouser:mongopass@mongo:27017/expense_db?authSource=admin
+      PORT: 5000
+    volumes:
+      # Sync local code changes for development
+      - ./backend:/usr/src/app
+      # Prevent host node_modules from overriding container node_modules
+      - /usr/src/app/node_modules 
+    depends_on:
+      - mongo # This dependency must be at the same level as 'volumes' and 'environment'
+
+  # 2. MONGODB SERVICE (Standard image)
+  mongo:
+    image: mongo:latest
+    container_name: mongodb_expense
+    restart: always
+    ports:
+      - "27017:27017" # Useful for connecting MongoDB Compass
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+    volumes:
+      - mongo-data:/data/db # Persistent storage for data
+
+volumes:
+  mongo-data: # Define the named volume
